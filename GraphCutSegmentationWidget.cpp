@@ -54,7 +54,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QFileDialog>
 #include <QLineEdit>
 #include <QMessageBox>
-#include <QtConcurrentRun>
+#include <QtConcurrent/QtConcurrent>
 
 // STL
 #include <iostream>

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.0)
 SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 Project(InteractiveImageGraphCutSegmentation)
@@ -15,36 +15,42 @@ if(WIN32)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_SCL_SECURE_NO_WARNINGS")
 endif(WIN32)
 
-FIND_PACKAGE(Qt4 REQUIRED)
-INCLUDE(${QT_USE_FILE})
+find_package(Qt5 COMPONENTS Core Gui Widgets Declarative Concurrent REQUIRED)
+
+# The Qt5Widgets_INCLUDES also includes the include directories for
+# dependencies QtCore and QtGui
+include_directories(${Qt5Widgets_INCLUDES})
+
+# We need add -DQT_WIDGETS_LIB when using QtWidgets in Qt 5.
+add_definitions(${Qt5Widgets_DEFINITIONS})
 
 set(InteractiveImageGraphCutSegmentation_libraries ${InteractiveImageGraphCutSegmentation_libraries} ${QT_LIBRARIES})
 
-QT4_WRAP_UI(GraphCutSegmentationUISrcs GraphCutSegmentationWidget.ui)
-QT4_WRAP_CPP(GraphCutSegmentationMOCSrcs GraphCutSegmentationWidget.h)
+QT5_WRAP_UI(GraphCutSegmentationUISrcs GraphCutSegmentationWidget.ui)
+QT5_WRAP_CPP(GraphCutSegmentationMOCSrcs GraphCutSegmentationWidget.h)
 
 # Allow Qt to find it's MOCed files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-# VTK
-FIND_PACKAGE(VTK REQUIRED)
-INCLUDE( ${USE_VTK_FILE} )
-
-if( "${VTK_MAJOR_VERSION}" LESS 6 )
-  MESSAGE(FATAL_ERROR "You must build this code with VTK >= 6.0!")
-endif( "${VTK_MAJOR_VERSION}" LESS 6 )
-
-set(InteractiveImageGraphCutSegmentation_libraries ${InteractiveImageGraphCutSegmentation_libraries} ${VTK_LIBRARIES})
-
 # ITK
-FIND_PACKAGE(ITK REQUIRED)
-INCLUDE( ${USE_ITK_FILE} )
+find_package(ITK REQUIRED)
+include(${ITK_USE_FILE})
 
 if( "${ITK_VERSION_MAJOR}" LESS 4 )
   MESSAGE(FATAL_ERROR "You must build this code with ITK >= 4.0!")
 endif( "${ITK_VERSION_MAJOR}" LESS 4 )
 
-set(InteractiveImageGraphCutSegmentation_libraries ${InteractiveImageGraphCutSegmentation_libraries} ${ITK_LIBRARIES})
+# VTK
+
+set(VTK_MODULES_REQUESTED ${VTK_MODULES_REQUESTED} vtkCommonCore vtkIOImage)
+find_package(VTK REQUIRED)
+include(${VTK_USE_FILE})
+
+if( "${VTK_MAJOR_VERSION}" LESS 6 )
+  MESSAGE(FATAL_ERROR "You must build this code with VTK >= 6.0!")
+endif( "${VTK_MAJOR_VERSION}" LESS 6 )
+
+set(InteractiveImageGraphCutSegmentation_libraries ${InteractiveImageGraphCutSegmentation_libraries} ${ITK_LIBRARIES} ${VTK_LIBRARIES})
 
 # Submodules
 # ITKVTKHelpers
